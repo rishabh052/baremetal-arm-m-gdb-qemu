@@ -12,4 +12,3 @@ reset_handler:
     mov r2, #0x2
     add r3, r1, r2
     bl .
-/Users/piyush/Movies/obs/ARM-M - Baremetal Assembly/3. Assembly Programs/3.1 Booting the Processor and First Assembly Program/map.ld
