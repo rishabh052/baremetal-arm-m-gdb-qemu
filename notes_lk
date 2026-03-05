@@ -23,13 +23,18 @@ top contains main.c
 ------------------------------------------
 
 building the kernel
-1. go to project folder, and select a make file to build
-2. outside the cloned folder, create a new folder for the user code changes.
-3. new folder has its own makefile, and rules.mk for the project and app.
-4. project1.mk is copied from project folder in lk.
-5. app/hello should be added in project.mk - this is for adding app/hello folder to get included in compilation.
-6. rules.mk defines .c files and includes module.mk(from lk)
-7. APP_START - defines the struct with app name, and places it in the app section
-8. if .init, and .entry is defined for the app, then kernel would execute those function.
-9. STATIC_COMMAND_START,STATIC_COMMAND,STATIC_COMMAND_END - this adds a command for the console, and the function mapped to the command, will get executed, whenever this command is passed in console
+- go to project folder, and select a make file to build
+- outside the cloned folder, create a new folder for the user code changes.
+- new folder has its own makefile, and rules.mk for the project and app.
+- project1.mk is copied from project folder in lk.
+- makefile is generated using script given in docs. similarly rules.mk is generated using script given in docs. 
+- app/hello should be added in project1.mk - this is for adding app/hello folder to get included in compilation.
+- rules.mk defines .c files and includes module.mk(from lk)
+- APP_START - defines the struct with app name, and places it in the app section
+- if .init, and .entry is defined for the app, then kernel would execute those function.
+- STATIC_COMMAND_START,STATIC_COMMAND,STATIC_COMMAND_END - this adds a command for the console, and the function mapped to the command, will get executed, whenever this command is passed in console
+
+TODO 
+- understand modules.mk -> make folder in lk
+- understand makefile created for app
 
