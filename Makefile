@@ -10,7 +10,7 @@ qemu:
 	qemu-system-arm -S -M $(BOARD) -cpu $(CPU) -nographic -kernel $(PROJECT).elf -gdb tcp::1234
 
 gdb:
-	#gdb-multiarch -iex "set auto-load safe-path /" -q $(PROJECT).elf -ex "target remote localhost:1234"
+	gdb-multiarch -iex "set auto-load safe-path /" -q $(PROJECT).elf -ex "target remote localhost:1234"
 	#gdb-multiarch -q $(PROJECT).elf -ex "target remote localhost:1234"
 
 clean:

@@ -32,3 +32,4 @@ reset_handler:
     .type systick_handler, %function
 systick_handler:
     add r5,r5,#1
+    bx lr
