@@ -4,7 +4,7 @@ status - xPSR - EPSR,APSR,IPSR
 config registers - CONTROL
 
 NVIC - nested vectored interrupt controller
-NVIC takes in all interrupt lines and using multiplexer, interrupt is passed to cpu interrupt bus. therefore for 128 peripheral interrupts, cpu (vector table) requires only 8/16 interrupt lines 
+NVIC takes in all interrupt lines and using multiplexer, interrupt is passed to cpu interrupt bus. therefore for 128 peripheral interrupts, cpu (vector table) requires only 8/16 interrupt lines
 
 NVIC config registers - level/edge trigger, interrupt line selection
 
@@ -24,7 +24,7 @@ assembler instructions - mov,add
 
 search cortex m3 instructions
 
-types of instruction - 
+types of instruction -
 - calculation
 - data movement - load store push pop
 - condition
@@ -55,7 +55,7 @@ push operation - first decrements address then pushes vales
 
 how cpu runs multiple tasks?
 
-all tasks are while(1) loop - 
+all tasks are while(1) loop -
 tasks can be switched among by scheduler by manipulating pc
 info should be saved whenever task is switched - save pc, and some GPRs
 
@@ -63,7 +63,7 @@ anatomy of task
 - each task has its own stack
 - cpu registers are stored into stack then task is switched
 - cpu registers include pc(r14)
-- with each systick interrupt, sp is updated, so that context can be switched when task extracts stack, consequently loading new pc value 
+- with each systick interrupt, sp is updated, so that context can be switched when task extracts stack, consequently loading new pc value
 - systick interrupt whenever it comes global registers are saved, local registers need to be saved, change the sp to new value, when cpu goes back to handler mode, cpu starts from new stack, popping global registers automatically, local registers should be popped manually, hence loading new pc value
 - systick isr is the scheduler
 
@@ -74,7 +74,7 @@ exception entry
 xPSR
 PC
 LR
-R12 
+R12
 R3
 R2
 R1
@@ -99,13 +99,15 @@ R0
 - load systick_cvr to r2
 - load timeout to r3, timeout is 24 bit timer value currently set to 0x000fffff
 
+- for ldr instructions = is used to assign 4 byte value to register, for str instruction [] is used to put register value in the location referenced with []
+
 - store the value in r3 to address at r1
 str r3, [r1] - timeout to be stored in rvr - rvr hold the reload value, so timer starts decrementing from 0x000fffff till 0
 - clear r3
 mov r3,#0x00
 - store the value in r3 to address at r2, current value of timer is cleared to 0
 str r3, [r2]
-- set last 3 bits of r3 to 1 
+- set last 3 bits of r3 to 1
 mov r3, #0x7
 - store the value in r3 to address at r0, control status register, bit 0,1,2 set to 1
 str r3, [r0]
@@ -130,7 +132,7 @@ move (r0,r3) on (r8,r11)
 pop {r4,r7} -> moves stack data to (r4,r7)
 - however before restoring context sp should be changed, so that r4-r11 are restored from new stack
 - stack for each task is stored in ram, and pc value in each stack should be that particular function name
-- as per video last 4 values were 
+- as per video last 4 values were
 0x1c -> sp
 0x309 -> link register(might be the address of reset handler/systick(??))
 main1 -> program counter
