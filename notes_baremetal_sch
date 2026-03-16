@@ -1,0 +1,157 @@
+programmers model - cpu is a bunch of registers
+GPRs - R0 - R15
+status - xPSR - EPSR,APSR,IPSR
+config registers - CONTROL
+
+NVIC - nested vectored interrupt controller
+NVIC takes in all interrupt lines and using multiplexer, interrupt is passed to cpu interrupt bus. therefore for 128 peripheral interrupts, cpu (vector table) requires only 8/16 interrupt lines 
+
+NVIC config registers - level/edge trigger, interrupt line selection
+
+any hardware is bunch of registers - UART, PCIE,SPI
+assembly language - instructions and directives
+.s - preprocessor is not run
+.S - preprocessor is run - so runs directives
+
+anything starting with . is directive, like .word(4 bytes), .type
+.section,.align
+
+.section is used to define sections which are then referenced in linker file to store at particular locations
+
+anything having : at the end is label - helps in diving program in different set of sequences
+
+assembler instructions - mov,add
+
+search cortex m3 instructions
+
+types of instruction - 
+- calculation
+- data movement - load store push pop
+- condition
+- branching
+
+semaphore instructions - through this instructions cpu ensures atomic load store happens - ldrex,strex
+
+svc instruction - used in context switching for thread mode, handler mode
+
+-----------------------------------
+STACK MANIPULATION
+
+push pop
+stack moves towards lower address - descending stack
+
+push {r1,r2} -> first r1 will be pushed, then r2 will be pushed into stack
+stack address will decrement by 8 bytes(4+4) after 2 values are pushed into it
+
+pop {r2,r1} -> stack value will pop to r2, then pop to r1 and stack address will increment
+sp will always point to current free address
+
+SRAM start address 0x20000000 - stm32vl
+SRAM size - 32 KB
+stack size is 4kb so stack pointer should be 0x20001000(first entry of vector table) =  0x20000000 + 4kb
+
+push operation - first decrements address then pushes vales
+-----------------------------------------------------
+
+how cpu runs multiple tasks?
+
+all tasks are while(1) loop - 
+tasks can be switched among by scheduler by manipulating pc
+info should be saved whenever task is switched - save pc, and some GPRs
+
+anatomy of task
+- each task has its own stack
+- cpu registers are stored into stack then task is switched
+- cpu registers include pc(r14)
+- with each systick interrupt, sp is updated, so that context can be switched when task extracts stack, consequently loading new pc value 
+- systick interrupt whenever it comes global registers are saved, local registers need to be saved, change the sp to new value, when cpu goes back to handler mode, cpu starts from new stack, popping global registers automatically, local registers should be popped manually, hence loading new pc value
+- systick isr is the scheduler
+
+cortex m3 generic user guide search in google
+
+exception entry
+- cpu stores in current stack following values automatically
+xPSR
+PC
+LR
+R12 
+R3
+R2
+R1
+R0
+
+- manually push R4 to R11 to current stack as soon as CPU lands in ISR
+
+- manually pop R4 to R11 from new stack, and then exit the exception. global registers will get popped automatically(INCLUDING PC AND LR)
+
+- tasks are stored as circular linked list
+
+- cortex-m3 generic user guide - check the systick configuration
+- memory mapped io for systick configuration
+- when systick timer reaches 0 it will trigger exception
+- systick interrupt is mapped to location 15(offset 0x3c) in vector table
+- .org 0x3c -> places the entry at 0x3c offset within section
+- .equ is equivalent to #define, (#equ reg_name, address) -> maps regname to address, so that regname can be used within program
+
+- configuration of systick handler to be within reset handler
+- load systick_csr to r0
+- load systick_rvr to r1
+- load systick_cvr to r2
+- load timeout to r3, timeout is 24 bit timer value currently set to 0x000fffff
+
+- store the value in r3 to address at r1
+str r3, [r1] - timeout to be stored in rvr - rvr hold the reload value, so timer starts decrementing from 0x000fffff till 0
+- clear r3
+mov r3,#0x00
+- store the value in r3 to address at r2, current value of timer is cleared to 0
+str r3, [r2]
+- set last 3 bits of r3 to 1 
+mov r3, #0x7
+- store the value in r3 to address at r0, control status register, bit 0,1,2 set to 1
+str r3, [r0]
+
+- initialise register r5 with value 0, since r5 is not part of stack frame, it wont be restored when exception returns
+
+- within systick handler, increment the value of r5
+- at the end of exception handler place bx lr, so that cpu can exit isr, here lr stores special value to indicate cpu it has returned from isr
+
+------------------------------------------
+- playing with push/pop to save context in systick
+-----------------------------------------
+- push r4 to r7 on stack
+push {r4-r7}
+- move (r8 to r11) on (r0 to r3)
+- push r0 to r3 on stack
+- push operation is divided in two parts, because push instruction can only fetch registers r0 to r7, because 3 bits are used up in encoding registers
+- registers r4 to r11 are not part of stack frame so they need to be pushed manually on stack
+- restoring context happens through pop command, by following exact opposite sequence of above
+pop {r0,r3} -> moves stack data to (r0,r3)
+move (r0,r3) on (r8,r11)
+pop {r4,r7} -> moves stack data to (r4,r7)
+- however before restoring context sp should be changed, so that r4-r11 are restored from new stack
+- stack for each task is stored in ram, and pc value in each stack should be that particular function name
+- as per video last 4 values were 
+0x1c -> sp
+0x309 -> link register(might be the address of reset handler/systick(??))
+main1 -> program counter
+0x01000000 -> xpsr
+
+- stack should be stored in flash and in runtime placed in ram by linker, so that it can be manipulated
+- systick can have some logic so that after some time stacks keep getting switched
+- or, within thread a new pendsv isr can be triggered to identify the next stack to be loaded based on scheduler logic
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
